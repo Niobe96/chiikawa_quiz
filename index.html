@@ -243,7 +243,14 @@ const BASE = [
   { id: "96Ho_bFxPqA", start: 23 },
   { id: "ZTdG5TB-mzk", start: 47 },
   { id: "F4OgX_mt9TU", start: 20 },
-  { id: "QKaThZL6DTU", start: 40 }
+  { id: "QKaThZL6DTU", start: 40 },
+  { id: "z97tQ-ihItw", start: 47 },
+  { id: "mfI4PXWx-Gg", start: 37 },
+  { id: "jUbSYJJSs_M", start: 6 },
+  { id: "L733URriIYM", start: 37 },
+  { id: "xovw6QTkl18", start: 13 },
+  { id: "TYnfx0I0L0I", start: 56 },
+  { id: "KfWHmlKBN6Q", start: 51 }
 ].map(r => ({ dur: DUR, answer: "", ...r }));
 const rounds = BASE;
 // 카카오 개발자 콘솔에서 받은 JavaScript 키를 넣으면 카카오톡 공유창이 바로 열려요.
@@ -254,6 +261,7 @@ const $ = id => document.getElementById(id);
 const stage = $("stage"), statusEl = $("status"), timeEl = $("time");
 let idx = 0, player = null, ready = false, extra = 0, clipEnd = 0, watcher = null, mode = "idle";
 let order = [], pos = 0, results = {};
+let finished = false, advT = null; // 방어용: 채점 완료 여부, O/X 후 자동 넘김 타이머
 let vol = 70;
 try { const v = parseInt(localStorage.getItem("quiz-volume"), 10); if (v >= 0 && v <= 100) vol = v; } catch (e) {}
 function applyVol() {
@@ -278,6 +286,8 @@ function say(main, sub) { statusEl.firstChild.textContent = main; timeEl.textCon
 function stopWatch() { clearInterval(watcher); watcher = null; stage.classList.remove("playing"); }
 
 function show() {
+  if (!order.length) shuffle();
+  pos = Math.min(Math.max(0, pos | 0), order.length - 1);
   idx = order[pos];
   const r = rounds[idx];
   stopWatch(); extra = 0; mode = "idle";
@@ -289,8 +299,15 @@ function show() {
   if (ready) player.cueVideoById({ videoId: r.id, startSeconds: r.start });
   setBtns();
 }
-function next() { if (pos < order.length - 1) { pos++; show(); } else finish(); }
-function prev() { if (pos > 0) { pos--; show(); } }
+function cancelAdvance() { clearTimeout(advT); advT = null; }
+// 마지막 문제를 넘어서면 절대 처음으로 돌아가지 않고 결과창만 보여 줘요.
+function next() {
+  cancelAdvance();
+  if (finished) { finish(); return; }
+  if (pos >= order.length - 1) { finish(); return; }
+  pos++; show();
+}
+function prev() { cancelAdvance(); if (finished || pos <= 0) return; pos--; show(); }
 
 function setBtns() {
   $("btnPlay").disabled = !ready;
@@ -337,10 +354,12 @@ function reveal() {
 }
 
 function judge(ok) {
-  if (results[idx] !== undefined) return;
+  if (finished || results[idx] !== undefined) return;
   results[idx] = ok;
   setBtns();
-  setTimeout(next, 500);
+  // 판정한 그 문제에 그대로 있을 때만 넘어가요 (그 사이 다음/이전/다시 하기를 누르면 취소)
+  const at = pos; cancelAdvance();
+  advT = setTimeout(() => { advT = null; if (!finished && pos === at) next(); }, 500);
 }
 
 const GRADES = [
@@ -351,6 +370,7 @@ const GRADES = [
 ];
 let lastResult = null;
 function finish() {
+  cancelAdvance(); finished = true;
   stopWatch(); if (player && player.pauseVideo) player.pauseVideo();
   const vals = Object.values(results), solved = vals.length, score = vals.filter(Boolean).length;
   const pct = solved ? Math.round(score / solved * 100) : 0;
@@ -373,7 +393,7 @@ function closeResult() {
   d.removeAttribute("open");
   document.documentElement.classList.remove("lock");
 }
-function restart() { closeResult(); results = {}; shuffle(); pos = 0; show(); }
+function restart() { cancelAdvance(); closeResult(); finished = false; results = {}; shuffle(); pos = 0; show(); }
 
 // ---------- 공유 ----------
 const pageUrl = () => location.origin + location.pathname;
