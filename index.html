@@ -77,9 +77,9 @@ input{width:100%;font:700 18px Gaegu,sans-serif;padding:10px 14px;border:2.5px s
 .ox button:disabled{opacity:.35}.ox button.sel:disabled{opacity:1}
 footer{margin-top:44px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--soft);font-size:17px}
 .linkbtn{width:64px;height:64px;padding:0;border-radius:50%;display:grid;place-items:center;background:var(--butter)}
-.modal{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:20px;background:rgba(90,64,54,.45)}
+.modal{position:fixed;inset:0;z-index:10;display:flex;overflow-y:auto;overscroll-behavior:contain;padding:20px;background:rgba(90,64,54,.45)}
 .modal[hidden]{display:none}
-.modal .card{width:min(420px,100%);background:var(--card);border:3px solid var(--ink);border-radius:var(--wob);
+.modal .card{margin:auto;width:min(420px,100%);background:var(--card);border:3px solid var(--ink);border-radius:var(--wob);
 box-shadow:6px 6px 0 var(--ink);padding:24px 22px;text-align:center;animation:pop .35s ease-out}
 .modal h2{font:400 30px Jua,sans-serif;margin:0}
 .score{font:400 30px Jua,sans-serif;margin:8px 0 0}.score b{font-size:64px;font-weight:400;color:var(--pinkd);text-shadow:3px 3px 0 var(--ink)}
@@ -87,6 +87,11 @@ box-shadow:6px 6px 0 var(--ink);padding:24px 22px;text-align:center;animation:po
 .grade.black{background:var(--ink);color:#fff0b3}
 .pct{margin:0;color:var(--soft);font-size:18px}
 .modal .row{display:grid;gap:10px;margin-top:16px}
+@media(max-height:560px){.modal .card{padding:14px 18px}.modal h2{font-size:24px}.score b{font-size:44px}.grade{font-size:21px;margin-top:4px}.modal .row{grid-template-columns:1fr 1fr;margin-top:10px}.modal .row button{min-height:44px;font-size:16px;padding:0 8px;white-space:nowrap}}
+.vol{display:flex;align-items:center;gap:12px;margin:-4px 0 8px;background:var(--card);border:2.5px solid var(--ink);border-radius:var(--wob2);padding:6px 16px;max-width:420px}
+.vol label{margin:0;font:400 18px Jua,sans-serif;color:var(--ink);white-space:nowrap;cursor:pointer;display:flex;align-items:center;gap:4px}
+.vol input{flex:1;padding:0;border:0;background:none;accent-color:var(--pinkd);height:28px;cursor:pointer}
+.vol output{font:400 17px Jua,sans-serif;min-width:3ch;text-align:right}
 .toast{position:fixed;left:50%;bottom:24px;z-index:20;transform:translate(-50%,40px);opacity:0;pointer-events:none;
 background:var(--ink);color:#fff;border-radius:16px;padding:10px 18px;font-size:17px;transition:.25s;max-width:90vw;text-align:center}
 .toast.on{transform:translate(-50%,0);opacity:1}
@@ -147,6 +152,11 @@ background:var(--ink);color:#fff;border-radius:16px;padding:10px 18px;font-size:
     <button id="btnPrev">◀ 이전</button>
     <button id="btnNext">다음 문제 ▶</button>
     <button class="end" id="btnEnd">■ 종료하고 채점</button>
+  </div>
+  <div class="vol">
+    <label for="vol" id="volIcon">🔊 볼륨</label>
+    <input type="range" id="vol" min="0" max="100" step="5" aria-label="볼륨">
+    <output id="volOut" for="vol">70</output>
   </div>
 
   <div class="answer" id="answer">
@@ -234,6 +244,14 @@ const $ = id => document.getElementById(id);
 const stage = $("stage"), statusEl = $("status"), timeEl = $("time");
 let idx = 0, player = null, ready = false, extra = 0, clipEnd = 0, watcher = null, mode = "idle";
 let order = [], pos = 0, results = {};
+let vol = 70;
+try { const v = parseInt(localStorage.getItem("quiz-volume"), 10); if (v >= 0 && v <= 100) vol = v; } catch (e) {}
+function applyVol() {
+  $("vol").value = vol; $("volOut").textContent = vol;
+  $("volIcon").textContent = (vol === 0 ? "🔇" : vol < 50 ? "🔉" : "🔊") + " 볼륨";
+  if (!player || !ready) return;
+  try { player.setVolume(vol); if (vol === 0) player.mute(); else player.unMute(); } catch (e) {}
+}
 
 // Fisher–Yates로 고르게 섞고, 같은 영상의 두 문제가 연달아 나오면 다시 섞기
 function shuffle() {
@@ -282,7 +300,7 @@ function playClip() {
   const len = r.dur + extra;
   clipEnd = r.start + len;
   player.seekTo(r.start, true);
-  player.unMute(); player.playVideo();
+  applyVol(); player.playVideo();
   say("귀를 쫑긋…", "");
   stage.classList.add("playing");
   watcher = setInterval(() => {
@@ -375,6 +393,8 @@ $("btnX").onclick = () => judge(false);
 $("btnRetry").onclick = restart;
 $("btnShare").onclick = () => { const r = lastResult; share("먼작귀 소리 퀴즈 결과: [" + r.g.name + "] " + r.solved + "문제 중 " + r.score + "개 정답 (" + r.pct + "%)! 너도 도전해 봐 👂"); };
 $("btnEnd").onclick = finish;
+$("vol").addEventListener("input", e => { vol = +e.target.value; applyVol(); try { localStorage.setItem("quiz-volume", vol); } catch (er) {} });
+applyVol();
 $("btnLink").onclick = () => share("이거 고거잖아... 고거.... 3초만 듣고 맞히는 먼작귀 소리 퀴즈!");
 
 shuffle();
@@ -385,7 +405,7 @@ show();
 let initDone = false, readyWatch = null;
 function markReady() {
   if (ready) return;
-  ready = true; clearInterval(readyWatch); clearTimeout(slowT); show();
+  ready = true; clearInterval(readyWatch); clearTimeout(slowT); applyVol(); show();
 }
 function initPlayer() {
   if (initDone || !(window.YT && YT.Player)) return;
