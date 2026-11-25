@@ -77,9 +77,10 @@ input{width:100%;font:700 18px Gaegu,sans-serif;padding:10px 14px;border:2.5px s
 .ox button:disabled{opacity:.35}.ox button.sel:disabled{opacity:1}
 footer{margin-top:44px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--soft);font-size:17px}
 .linkbtn{width:64px;height:64px;padding:0;border-radius:50%;display:grid;place-items:center;background:var(--butter)}
-.modal{border:0;padding:20px;margin:0;background:transparent;width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;overflow-y:auto;overscroll-behavior:contain}
-.modal[open]{display:flex}
-.modal::backdrop{background:rgba(90,64,54,.45)}
+.modal{display:none;position:fixed;inset:0;z-index:100;border:0;padding:20px;margin:0;color:inherit;
+background:rgba(90,64,54,.45);width:100%;max-width:none;height:100%;max-height:none;overflow-y:auto;overscroll-behavior:contain}
+.modal.show{display:flex}
+.modal::backdrop{background:transparent}
 html.lock{overflow:hidden}
 .modal .card{margin:auto;width:min(420px,100%);background:var(--card);border:3px solid var(--ink);border-radius:var(--wob);
 box-shadow:6px 6px 0 var(--ink);padding:24px 22px;text-align:center;animation:popIn .35s ease-out}
@@ -241,7 +242,7 @@ const BASE = [
 const rounds = BASE;
 // 카카오 개발자 콘솔에서 받은 JavaScript 키를 넣으면 카카오톡 공유창이 바로 열려요.
 // 비워 두면 스마트폰 기본 공유 시트(카카오톡 선택 가능) → 안 되면 링크 복사로 동작해요.
-const KAKAO_KEY = "4bc0b165ad92bb455b6d202485e8d9f5";
+const KAKAO_KEY = "4fd735651b98e06d3c95c5fffca616cb";
 
 const $ = id => document.getElementById(id);
 const stage = $("stage"), statusEl = $("status"), timeEl = $("time");
@@ -355,11 +356,18 @@ function finish() {
   $("resPct").textContent = "정답률 " + pct + "%" + (solved < rounds.length ? " · 전체 " + rounds.length + "문제 중 " + solved + "문제 풀었어요" : "");
   $("resMsg").textContent = g.msg;
   const d = $("result");
-  if (!d.open) { if (d.showModal) d.showModal(); else d.setAttribute("open", ""); }
+  d.classList.add("show");
+  if (typeof d.showModal === "function" && !d.open) { try { d.showModal(); } catch (e) {} }
   document.documentElement.classList.add("lock");
   $("btnShare").focus();
 }
-function closeResult() { const d = $("result"); if (d.open) { if (d.close) d.close(); else d.removeAttribute("open"); } document.documentElement.classList.remove("lock"); }
+function closeResult() {
+  const d = $("result");
+  d.classList.remove("show");
+  if (typeof d.close === "function" && d.open) { try { d.close(); } catch (e) {} }
+  d.removeAttribute("open");
+  document.documentElement.classList.remove("lock");
+}
 function restart() { closeResult(); results = {}; shuffle(); pos = 0; show(); }
 
 // ---------- 공유 ----------
