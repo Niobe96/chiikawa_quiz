@@ -57,6 +57,7 @@ button:active{transform:translate(2px,3px);box-shadow:1px 1px 0 var(--ink)}
 button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px dashed var(--pinkd);outline-offset:3px}
 button.p{background:var(--pink)}button.m{background:var(--mint)}button.y{background:var(--butter)}
 button:disabled{opacity:.45;cursor:default}
+button.end{background:#e9ddd3}
 .grow{flex:1}
 label{display:block;font-size:18px;color:var(--soft);margin-bottom:4px}
 input{width:100%;font:700 18px Gaegu,sans-serif;padding:10px 14px;border:2.5px solid var(--ink);border-radius:var(--wob2);background:var(--card);color:var(--ink)}
@@ -68,19 +69,28 @@ input{width:100%;font:700 18px Gaegu,sans-serif;padding:10px 14px;border:2.5px s
 .answer p{margin:4px 0}
 .mine{color:var(--soft)}
 .err{display:none;margin-top:12px;color:#c9577b;font-weight:700}
-details{margin-top:40px;border-top:2.5px dashed #e6d3c4;padding-top:18px}
-summary{font:400 22px Jua,sans-serif;cursor:pointer;min-height:44px;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
-summary small{font:700 16px Gaegu,sans-serif;color:var(--soft)}
-ol{padding:0;margin:12px 0 0;list-style:none;display:grid;gap:8px}
-ol li{display:flex;align-items:center;gap:10px;background:var(--card);border:2px solid var(--ink);border-radius:var(--wob2);padding:6px 8px 6px 14px}
-ol li.cur{background:var(--butter)}
-ol li span{flex:1;font-size:17px;overflow-wrap:anywhere}
-ol li button{min-height:40px;font-size:15px;padding:0 12px;box-shadow:2px 2px 0 var(--ink)}
-.form{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:12px;margin-top:16px}
-.form .full{grid-column:1/-1}
-.note{font-size:16px;color:var(--soft)}
-footer{margin-top:36px;text-align:center;color:var(--soft);font-size:16px}
-@media(max-width:600px){.form{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.form .url{grid-column:1/-1}
+.answer .q{margin-top:12px;font:400 20px Jua,sans-serif}
+.ox{display:flex;gap:14px;margin-top:6px}
+.ox button{flex:1;min-height:64px;font:400 34px Jua,sans-serif}
+.ox .o{background:var(--mint)}.ox .x{background:var(--pink)}
+.ox button.sel{outline:4px solid var(--ink);outline-offset:2px}
+.ox button:disabled{opacity:.35}.ox button.sel:disabled{opacity:1}
+footer{margin-top:44px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--soft);font-size:17px}
+.linkbtn{width:64px;height:64px;padding:0;border-radius:50%;display:grid;place-items:center;background:var(--butter)}
+.modal{position:fixed;inset:0;z-index:10;display:grid;place-items:center;padding:20px;background:rgba(90,64,54,.45)}
+.modal[hidden]{display:none}
+.modal .card{width:min(420px,100%);background:var(--card);border:3px solid var(--ink);border-radius:var(--wob);
+box-shadow:6px 6px 0 var(--ink);padding:24px 22px;text-align:center;animation:pop .35s ease-out}
+.modal h2{font:400 30px Jua,sans-serif;margin:0}
+.score{font:400 30px Jua,sans-serif;margin:8px 0 0}.score b{font-size:64px;font-weight:400;color:var(--pinkd);text-shadow:3px 3px 0 var(--ink)}
+.grade{display:inline-block;margin:10px 0 0;font:400 26px Jua,sans-serif;background:var(--butter);border:2.5px solid var(--ink);border-radius:var(--wob2);padding:4px 18px;box-shadow:3px 3px 0 var(--ink);transform:rotate(-2deg)}
+.grade.black{background:var(--ink);color:#fff0b3}
+.pct{margin:0;color:var(--soft);font-size:18px}
+.modal .row{display:grid;gap:10px;margin-top:16px}
+.toast{position:fixed;left:50%;bottom:24px;z-index:20;transform:translate(-50%,40px);opacity:0;pointer-events:none;
+background:var(--ink);color:#fff;border-radius:16px;padding:10px 18px;font-size:17px;transition:.25s;max-width:90vw;text-align:center}
+.toast.on{transform:translate(-50%,0);opacity:1}
+@media(max-width:600px){
 .ctrl button{flex:1 1 40%}.grow{display:none}.stage{box-shadow:4px 4px 0 var(--ink);border-radius:26px 10px 22px 12px/12px 22px 10px 26px}}
 @media(prefers-reduced-motion:reduce){.playing .drops i,.cloud{animation:none}.playing .drops i{height:75%}.page{transition:opacity .2s}}
 </style>
@@ -90,9 +100,9 @@ footer{margin-top:36px;text-align:center;color:var(--soft);font-size:16px}
   <div class="top">
     <div>
       <h1>먼작귀 퀴즈</h1>
-      <p class="sub">소리만 살짝 듣고 어떤 장면인지 맞혀 봐요!</p>
+      <p class="sub">이거 고거잖아... 고거....</p>
     </div>
-    <div class="tag" id="count">1번째 문제</div>
+    <div class="tag" id="count">1 / 1</div>
   </div>
 
   <div class="stage" id="stage">
@@ -136,32 +146,43 @@ footer{margin-top:36px;text-align:center;color:var(--soft);font-size:16px}
     <span class="grow"></span>
     <button id="btnPrev">◀ 이전</button>
     <button id="btnNext">다음 문제 ▶</button>
+    <button class="end" id="btnEnd">■ 종료하고 채점</button>
   </div>
-
-  <label for="guess">내 추측 (적어 두면 정답이랑 같이 보여 줘요)</label>
-  <input id="guess" placeholder="예: 누가 울먹이는 장면?">
 
   <div class="answer" id="answer">
     <h2>정답 장면이에요!</h2>
     <p id="ansText"></p>
     <p>영상으로 확인하기: <a id="ansLink" href="#" target="_blank" rel="noopener"></a></p>
-    <p class="mine" id="mine"></p>
+    <p class="q">맞혔나요?</p>
+    <div class="ox">
+      <button class="o" id="btnO" aria-label="맞혔어요">O</button>
+      <button class="x" id="btnX" aria-label="틀렸어요">X</button>
+    </div>
   </div>
   <p class="err" id="err"></p>
 
-  <details>
-    <summary>문제 목록 · 추가하기 <small>(열면 정답 힌트가 보여요)</small></summary>
-    <ol id="list"></ol>
-    <div class="form">
-      <div class="url"><label for="fUrl">YouTube 링크 (?t=40 이 있으면 시작 시간 자동 입력)</label><input id="fUrl" placeholder="https://youtu.be/...?t=40"></div>
-      <div><label for="fStart">시작(초)</label><input id="fStart" type="number" min="0" step="0.5" value="0"></div>
-      <div><label for="fDur">재생 길이(초)</label><input id="fDur" type="number" min="0.5" step="0.5" value="3"></div>
-      <div class="full"><label for="fAns">정답 설명 (선택)</label><input id="fAns" placeholder="정답 때 보여 줄 한 줄 설명"></div>
-      <div class="full"><button class="p" id="btnAdd">문제 추가</button> <span class="note">직접 추가한 문제는 이 기기 브라우저에만 저장돼요.</span></div>
-    </div>
-  </details>
-  <footer>개인 재미용 · 영상은 YouTube 공식 플레이어로 재생돼요</footer>
+  <footer>
+    <button class="linkbtn" id="btnLink" aria-label="이 페이지 공유하기">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>
+    </button>
+    <span>친구에게 퀴즈 공유하기</span>
+  </footer>
 </main>
+
+<div class="modal" id="result" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="resTitle">
+    <h2 id="resTitle">결과 발표!</h2>
+    <p class="grade" id="resGrade"></p>
+    <p class="score"><b id="resScore">0</b> / <span id="resTotal">0</span></p>
+    <p class="pct" id="resPct"></p>
+    <p id="resMsg"></p>
+    <div class="row">
+      <button class="p" id="btnShare">카카오톡으로 공유하기</button>
+      <button class="m" id="btnRetry">다시 하기</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
@@ -177,82 +198,82 @@ const BASE = [
   { id: "tSjEgj5zjv0", start: 31 },
   { id: "cXDK9tbNCEU", start: 57 },
   { id: "Ph_dKzMNx58", start: 18 },
-  { id: "jUbSYJJSs_M", start: 3 }
-].map(r => ({ dur: DUR, answer: "", ...r, base: true }));
-const KEY = "sound-quiz-custom-v2";
-let custom = [];
-try { const s = JSON.parse(localStorage.getItem(KEY)); if (Array.isArray(s)) custom = s; } catch (e) {}
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(custom)); } catch (e) {} };
-let rounds = [];
-const rebuild = () => { rounds = BASE.concat(custom); };
-rebuild();
+  { id: "jUbSYJJSs_M", start: 3 },
+  { id: "Vg66rPDlwlU", start: 13 },
+  { id: "Vg66rPDlwlU", start: 49 },
+  { id: "XE_0yrgRC9s", start: 24 },
+  { id: "nCLx8vmHDqY", start: 9 },
+  { id: "XvJ6-UQbbYE", start: 41 },
+  { id: "cC3BL9YeFSU", start: 52 },
+  { id: "dyNbwLmE7C8", start: 16 },
+  { id: "_4HEngaUROg", start: 30 },
+  { id: "_4HEngaUROg", start: 43 },
+  { id: "AsKXFHOAvbY", start: 42 },
+  { id: "3kSvvXrtd9w", start: 26 },
+  { id: "3kSvvXrtd9w", start: 57 },
+  { id: "x-OxpDicqKo", start: 27 },
+  { id: "x-OxpDicqKo", start: 51 },
+  { id: "YiXvoKtKn2Q", start: 16 },
+  { id: "DIFB-xZdK0c", start: 47 },
+  { id: "lv1P47MubJo", start: 22 },
+  { id: "Lsja9wxLOGA", start: 16 },
+  { id: "xoBISdrp2zQ", start: 31 },
+  { id: "Od_aDJTnh7A", start: 7 },
+  { id: "PN0VmWYBRII", start: 56 },
+  { id: "qrSYMFdA4-w", start: 31 },
+  { id: "OXf8IUiVd5k", start: 39 },
+  { id: "jD1NPsonick", start: 25 },
+  { id: "v_f2Uzk5z9s", start: 56 },
+  { id: "TU01o8ySPGk", start: 52 }
+].map(r => ({ dur: DUR, answer: "", ...r }));
+const rounds = BASE;
+// 카카오 개발자 콘솔에서 받은 JavaScript 키를 넣으면 카카오톡 공유창이 바로 열려요.
+// 비워 두면 스마트폰 기본 공유 시트(카카오톡 선택 가능) → 안 되면 링크 복사로 동작해요.
+const KAKAO_KEY = "4bc0b165ad92bb455b6d202485e8d9f5";
 
 const $ = id => document.getElementById(id);
 const stage = $("stage"), statusEl = $("status"), timeEl = $("time");
 let idx = 0, player = null, ready = false, extra = 0, clipEnd = 0, watcher = null, mode = "idle";
-let order = [], pos = 0, history = [], num = 0;
+let order = [], pos = 0, results = {};
 
-function shuffle(avoidFirst) {
-  order = rounds.map((_, i) => i);
-  for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
-  if (order.length > 1 && order[0] === avoidFirst) [order[0], order[1]] = [order[1], order[0]];
-  pos = 0;
-}
-
-function parseUrl(u) {
-  u = (u || "").trim();
-  let id = "", t = null;
-  try {
-    const url = new URL(u);
-    if (url.hostname.includes("youtu.be")) id = url.pathname.slice(1).split("/")[0];
-    else if (url.pathname.startsWith("/shorts/") || url.pathname.startsWith("/embed/")) id = url.pathname.split("/")[2];
-    else id = url.searchParams.get("v") || "";
-    const tv = url.searchParams.get("t") || url.searchParams.get("start");
-    if (tv) {
-      const m = tv.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+(?:\.\d+)?)s?)?$/);
-      t = m ? (+(m[1] || 0)) * 3600 + (+(m[2] || 0)) * 60 + (+(m[3] || 0)) : parseFloat(tv);
-    }
-  } catch (e) { if (/^[\w-]{11}$/.test(u)) id = u; }
-  return { id, t };
+// Fisher–Yates로 고르게 섞고, 같은 영상의 두 문제가 연달아 나오면 다시 섞기
+function shuffle() {
+  const adjacent = o => o.some((v, i) => i > 0 && rounds[v].id === rounds[o[i - 1]].id);
+  for (let tries = 0; tries < 200; tries++) {
+    order = rounds.map((_, i) => i);
+    for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+    if (!adjacent(order)) break;
+  }
 }
 const fmt = s => { s = Math.floor(s); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
 const linkOf = r => "https://youtu.be/" + r.id + "?t=" + Math.floor(r.start);
 function say(main, sub) { statusEl.firstChild.textContent = main; timeEl.textContent = sub || ""; }
-
 function stopWatch() { clearInterval(watcher); watcher = null; stage.classList.remove("playing"); }
 
-function show(i) {
-  idx = i;
+function show() {
+  idx = order[pos];
   const r = rounds[idx];
   stopWatch(); extra = 0; mode = "idle";
   stage.classList.remove("open");
   $("answer").classList.remove("show");
   $("err").style.display = "none";
-  $("guess").value = "";
-  $("count").textContent = num + "번째 문제 · 총 " + rounds.length + "개";
-  say(ready ? "버튼을 누르면 소리가 나와요" : "플레이어 준비 중…", r.dur + "초 동안 들려요");
+  $("count").textContent = (pos + 1) + " / " + rounds.length;
+  say(ready ? "3초만 듣고 맞춰보자!" : "플레이어 준비 중…", ready ? "에이 에이 오!" : "");
   if (ready) player.cueVideoById({ videoId: r.id, startSeconds: r.start });
-  setBtns(); renderList();
+  setBtns();
 }
-function next() {
-  if (pos >= order.length) shuffle(idx);
-  const i = order[pos++];
-  history.push(i); num = history.length;
-  show(i);
-}
-function prev() {
-  if (history.length < 2) return;
-  history.pop(); pos = Math.max(0, pos - 1);
-  num = history.length;
-  show(history[history.length - 1]);
-}
+function next() { if (pos < order.length - 1) { pos++; show(); } else finish(); }
+function prev() { if (pos > 0) { pos--; show(); } }
 
 function setBtns() {
   $("btnPlay").disabled = !ready;
   $("btnMore").disabled = !ready || mode === "answer";
   $("btnAns").disabled = !ready || mode === "answer";
-  $("btnPrev").disabled = history.length < 2;
-  $("btnPlay").textContent = mode === "answer" ? "▶ 장면 다시 보기" : (mode === "heard" ? "↺ 다시 듣기" : "▶ 소리 듣기");
+  $("btnPrev").disabled = pos === 0;
+  $("btnNext").textContent = pos === order.length - 1 ? "결과 보기 ▶" : "다음 문제 ▶";
+  $("btnPlay").textContent = mode === "answer" ? "▶ 다시 보기" : (mode === "heard" ? "↺ 다시 듣기" : "▶ 소리 듣기");
+  const v = results[idx];
+  ["btnO", "btnX"].forEach(b => { const el = $(b); el.disabled = v !== undefined; el.classList.toggle("sel", v === (b === "btnO")); });
 }
 
 function playClip() {
@@ -284,52 +305,81 @@ function reveal() {
   $("ansText").textContent = r.answer || "";
   $("ansText").style.display = r.answer ? "block" : "none";
   const a = $("ansLink"); a.href = linkOf(r); a.textContent = linkOf(r) + " (" + fmt(r.start) + "부터)";
-  const g = $("guess").value.trim();
-  $("mine").textContent = g ? "내 추측: " + g : "";
   $("answer").classList.add("show");
   player.seekTo(r.start, true); player.playVideo();
   setBtns();
 }
 
-function renderList() {
-  const ol = $("list"); ol.innerHTML = "";
-  rounds.forEach((r, i) => {
-    const li = document.createElement("li");
-    if (i === idx) li.className = "cur";
-    const sp = document.createElement("span");
-    sp.textContent = (i + 1) + ". " + r.id + " · " + fmt(r.start) + "부터 " + r.dur + "초" + (r.answer ? " · " + r.answer : "");
-    const go = document.createElement("button"); go.textContent = "풀기";
-    go.onclick = () => { history.push(i); num = history.length; show(i); };
-    li.append(sp, go);
-    if (!r.base) {
-      const del = document.createElement("button"); del.textContent = "삭제";
-      del.onclick = () => {
-        const ci = i - BASE.length; custom.splice(ci, 1); save(); rebuild();
-        history = []; shuffle(-1); next();
-      };
-      li.append(del);
-    }
-    ol.append(li);
-  });
+function judge(ok) {
+  if (results[idx] !== undefined) return;
+  results[idx] = ok;
+  setBtns();
+  setTimeout(next, 500);
 }
 
-$("fUrl").addEventListener("input", e => { const p = parseUrl(e.target.value); if (p.t != null && !isNaN(p.t)) $("fStart").value = p.t; });
-$("btnAdd").onclick = () => {
-  const p = parseUrl($("fUrl").value);
-  if (!p.id) { $("err").textContent = "YouTube 링크를 확인해 주세요."; $("err").style.display = "block"; return; }
-  custom.push({ id: p.id, start: Math.max(0, +$("fStart").value || 0), dur: Math.max(0.5, +$("fDur").value || DUR), answer: $("fAns").value.trim() });
-  save(); rebuild(); $("fUrl").value = ""; $("fAns").value = "";
-  const i = rounds.length - 1; order.push(i);
-  history.push(i); num = history.length; show(i);
-};
+const GRADES = [
+  { min: 91, name: "검은 별똥별", cls: "black", msg: "소리만 들어도 장면이 다 보이는 경지! 더 이상 가르칠 게 없어요." },
+  { min: 71, name: "별똥별", msg: "반짝반짝! 웬만한 장면은 다 알아듣는 실력이에요." },
+  { min: 50, name: "우호형", msg: "꽤 친해졌네요! 조금만 더 들으면 별똥별도 가능해요." },
+  { min: 0, name: "의태형", msg: "아직은 흉내만 내는 단계… 다시 들으면 고거 알 수 있어요!" }
+];
+let lastResult = null;
+function finish() {
+  stopWatch(); if (player && player.pauseVideo) player.pauseVideo();
+  const vals = Object.values(results), solved = vals.length, score = vals.filter(Boolean).length;
+  const pct = solved ? Math.round(score / solved * 100) : 0;
+  const g = GRADES.find(x => pct >= x.min);
+  lastResult = { score, solved, pct, g };
+  $("resGrade").textContent = g.name; $("resGrade").className = "grade " + (g.cls || "");
+  $("resScore").textContent = score; $("resTotal").textContent = solved;
+  $("resPct").textContent = "정답률 " + pct + "%" + (solved < rounds.length ? " · 전체 " + rounds.length + "문제 중 " + solved + "문제 풀었어요" : "");
+  $("resMsg").textContent = g.msg;
+  $("result").hidden = false; $("btnShare").focus();
+}
+function restart() { $("result").hidden = true; results = {}; shuffle(); pos = 0; show(); }
+
+// ---------- 공유 ----------
+const pageUrl = () => location.origin + location.pathname;
+let kakaoReady = false;
+if (KAKAO_KEY) {
+  const sc = document.createElement("script");
+  sc.src = "https://t1.kakaocdn.net/kakao_js_sdk/2.8.2/kakao.min.js";
+  sc.onload = () => { try { if (!Kakao.isInitialized()) Kakao.init(KAKAO_KEY); kakaoReady = true; } catch (e) {} };
+  document.head.append(sc);
+}
+let toastT;
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2400); }
+async function copy(txt) {
+  try { await navigator.clipboard.writeText(txt); return true; } catch (e) {}
+  const ta = document.createElement("textarea"); ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0";
+  document.body.append(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch (e) {} ta.remove(); return ok;
+}
+async function share(text) {
+  const url = pageUrl();
+  if (kakaoReady) {
+    try { Kakao.Share.sendDefault({ objectType: "text", text, link: { mobileWebUrl: url, webUrl: url }, buttonTitle: "퀴즈 풀러 가기" }); return; } catch (e) {}
+  }
+  if (navigator.share) {
+    try { await navigator.share({ title: document.title, text, url }); return; }
+    catch (e) { if (e.name === "AbortError") return; }
+  }
+  toast(await copy(text + "\n" + url) ? "링크를 복사했어요! 카톡 대화창에 붙여 넣어 주세요" : url);
+}
+
 $("btnPlay").onclick = playClip;
 $("btnMore").onclick = () => { extra += 1; mode = "idle"; playClip(); };
 $("btnAns").onclick = reveal;
 $("btnPrev").onclick = prev;
 $("btnNext").onclick = next;
+$("btnO").onclick = () => judge(true);
+$("btnX").onclick = () => judge(false);
+$("btnRetry").onclick = restart;
+$("btnShare").onclick = () => { const r = lastResult; share("먼작귀 소리 퀴즈 결과: [" + r.g.name + "] " + r.solved + "문제 중 " + r.score + "개 정답 (" + r.pct + "%)! 너도 도전해 봐 👂"); };
+$("btnEnd").onclick = finish;
+$("btnLink").onclick = () => share("이거 고거잖아... 고거.... 3초만 듣고 맞히는 먼작귀 소리 퀴즈!");
 
-shuffle(-1);
-next();
+shuffle();
+show();
 
 window.onYouTubeIframeAPIReady = () => {
   const r = rounds[idx];
@@ -337,7 +387,7 @@ window.onYouTubeIframeAPIReady = () => {
     videoId: r.id,
     playerVars: { start: Math.floor(r.start), controls: 0, disablekb: 1, rel: 0, playsinline: 1, cc_load_policy: 0, iv_load_policy: 3, fs: 0 },
     events: {
-      onReady: () => { ready = true; show(idx); },
+      onReady: () => { ready = true; show(); },
       onError: e => {
         const msg = (e.data === 101 || e.data === 150 || e.data === 153)
           ? "이 영상은 다른 페이지에서 재생이 막혀 있어요. 정답 링크로 YouTube에서 확인하거나 다음 문제로 넘어가 주세요."
