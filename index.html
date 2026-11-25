@@ -149,8 +149,7 @@ background:var(--ink);color:#fff;border-radius:16px;padding:10px 18px;font-size:
   </div>
 
   <div class="ctrl">
-    <button class="p" id="btnPlay" disabled>▶ 소리 듣기</button>
-    <button class="y" id="btnMore" disabled>+1초 힌트</button>
+    <button class="p" id="btnPlay" disabled>▶ 듣기</button>
     <button class="m" id="btnAns" disabled>정답 보기</button>
     <span class="grow"></span>
     <button id="btnPrev">◀ 이전</button>
@@ -237,7 +236,14 @@ const BASE = [
   { id: "OXf8IUiVd5k", start: 39 },
   { id: "jD1NPsonick", start: 25 },
   { id: "v_f2Uzk5z9s", start: 56 },
-  { id: "TU01o8ySPGk", start: 52 }
+  { id: "TU01o8ySPGk", start: 52 },
+  { id: "eRkOZRaO7Gw", start: 16 },
+  { id: "G8RbrrDwWY4", start: 14 },
+  { id: "JJcAwbmTXEc", start: 18 },
+  { id: "96Ho_bFxPqA", start: 23 },
+  { id: "ZTdG5TB-mzk", start: 47 },
+  { id: "F4OgX_mt9TU", start: 20 },
+  { id: "QKaThZL6DTU", start: 40 }
 ].map(r => ({ dur: DUR, answer: "", ...r }));
 const rounds = BASE;
 // 카카오 개발자 콘솔에서 받은 JavaScript 키를 넣으면 카카오톡 공유창이 바로 열려요.
@@ -288,11 +294,10 @@ function prev() { if (pos > 0) { pos--; show(); } }
 
 function setBtns() {
   $("btnPlay").disabled = !ready;
-  $("btnMore").disabled = !ready || mode === "answer";
   $("btnAns").disabled = !ready || mode === "answer";
   $("btnPrev").disabled = pos === 0;
   $("btnNext").textContent = pos === order.length - 1 ? "결과 보기 ▶" : "다음 문제 ▶";
-  $("btnPlay").textContent = mode === "answer" ? "▶ 다시 보기" : (mode === "heard" ? "↺ 다시 듣기" : "▶ 소리 듣기");
+  $("btnPlay").textContent = mode === "answer" ? "▶ 다시 보기" : (mode === "heard" ? "↺ 다시 듣기" : "▶ 듣기");
   const v = results[idx];
   ["btnO", "btnX"].forEach(b => { const el = $(b); el.disabled = v !== undefined; el.classList.toggle("sel", v === (b === "btnO")); });
 }
@@ -399,7 +404,6 @@ async function share(text) {
 }
 
 $("btnPlay").onclick = playClip;
-$("btnMore").onclick = () => { extra += 1; mode = "idle"; playClip(); };
 $("btnAns").onclick = reveal;
 $("btnPrev").onclick = prev;
 $("btnNext").onclick = next;
